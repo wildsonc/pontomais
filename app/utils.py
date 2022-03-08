@@ -161,11 +161,11 @@ class Group:
             a = self._op(group.team_filter)(d, t)
         else:
             a = d and not t
-        if group.team_filter != 'not':
+        if group.city_filter != 'not':
             b = self._op(group.city_filter)(a, c)
         else:
             b = a and not c
-        if group.team_filter != 'not':
+        if group.company_filter != 'not':
             j = self._op(group.company_filter)(b, cp)
         else:
             j = b and not cp
