@@ -16,7 +16,12 @@ def update(request):
 
 @api_view(['POST', 'GET'])
 @csrf_exempt
-def teste(request):
-    print('teste')
-    update_extra_time()
+def journey(request, date=None):
+    days = request.query_params.get('days')
+    if date:
+        update_journey(date)
+    elif days:
+        bulk_update_journey(int(days))
+    else:
+        update_journey()
     return JsonResponse({"status": "OK"})

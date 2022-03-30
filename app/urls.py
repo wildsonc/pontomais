@@ -11,7 +11,8 @@ def admin(request):
 
 urlpatterns = [
     path('update', views.update, name='update'),
-    path('teste', views.teste, name='teste'),
+    path('updateJourney', views.journey, name='update_journey_default'),
+    path('updateJourney/<str:date>', views.journey, name='update_journey'),
     path('', admin)
 ]
 

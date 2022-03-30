@@ -204,7 +204,10 @@ def send_table(data, chat_id):
 
 
 def work_days(delay: int = 0):
-    today = datetime.now().replace(day=26)
+    today = datetime.now()
+    if today.day > 25:
+        today = today + relativedelta(months=1)
+    today = today.replace(day=26)
     start_date = today.date() + relativedelta(months=-(1 + delay))
     end_date = today.date().replace(day=25) + relativedelta(months=-delay)
     if today.day > 26:

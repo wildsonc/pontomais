@@ -140,10 +140,12 @@ class Journey(models.Model):
     h2 = models.IntegerField()
     h3 = models.IntegerField()
     h4 = models.IntegerField()
+    overnight_time = models.IntegerField()
     total_time = models.IntegerField()
     missing_days = models.IntegerField()
     proposals = models.IntegerField()
-    dt = models.DateTimeField()
+    update_at = models.DateTimeField(auto_now=True)
+    dt = models.DateField()
 
 
 class History(models.Model):

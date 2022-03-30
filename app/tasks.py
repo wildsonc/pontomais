@@ -155,37 +155,48 @@ def update_employees():
 
 
 @shared_task
-def update_journey():
-    start_date, end_date = work_days()
+def update_journey(date: str = None, relative: int = None):
+    if not date:
+        date = str((datetime.today() - timedelta(days=1)).date())
+    if relative:
+        date = str((datetime.today() - timedelta(days=relative)).date())
     payload = {
         "report": {
-            "start_date": start_date,
-            "end_date": end_date,
+            "start_date": date,
+            "end_date": date,
             "group_by": "",
             "row_filters": "",
-            "columns": "employee_name,extra_time,missing_days,proposals,team_name,summary,total_time",
+            "columns": "employee_name,extra_time,missing_days,proposals,team_name,summary,total_time,overnight_time",
             "format": "json"
         }
     }
     data = req('reports/period_summaries', payload)['data'][0]
-    timezone = pytz.timezone(settings.TIME_ZONE)
-    date = datetime.now() - timedelta(days=1)
-    dt = timezone.localize(date)
     if data:
         data = data[0]['data']
         for r in data:
             employee = Employee.objects.get(name=r['employee_name'])
             h1, h2, h3, h4 = [time_parser(e) for e in r['extra_time']]
             interval, missing, normal = [time_parser(e) for e in r['summary']]
-            Journey.objects.create(employee=employee,
-                                   h1=h1,
-                                   h2=h2,
-                                   h3=h3,
-                                   h4=h4,
-                                   interval=interval,
-                                   missing=missing,
-                                   normal=normal,
-                                   total_time=time_parser(r['total_time']),
-                                   missing_days=r['missing_days'],
-                                   proposals=r['proposals'],
-                                   dt=dt)
+            overnight_time = r['overnight_time']
+            Journey.objects.update_or_create(employee=employee,
+                                             dt=date,
+                                             defaults={
+                                                 "h1": h1,
+                                                 "h2": h2,
+                                                 "h3": h3,
+                                                 "h4": h4,
+                                                 "interval": interval,
+                                                 "missing": missing,
+                                                 "normal": normal,
+                                                 "total_time": time_parser(r['total_time']),
+                                                 "missing_days": r['missing_days'],
+                                                 "proposals": r['proposals'],
+                                                 "overnight_time": time_parser(overnight_time)
+                                             })
+    return date
+
+
+@shared_task
+def bulk_update_journey(days: int):
+    for i in range(days):
+        update_journey.delay(relative=i+1)
